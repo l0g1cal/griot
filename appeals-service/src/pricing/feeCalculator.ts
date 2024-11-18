@@ -15,11 +15,11 @@ export function calculateFilingFee(appeal: AppealCase, ledger: AuditLedger): Fee
   const baseFee = BASE_FEES[appeal.category];
   ledger.record(appeal.id, 'BASE_FEE', baseFee);
 
-  const adjusted = applyRegionalAdjustment(baseFee, appeal.region);
-  ledger.record(appeal.id, 'REGIONAL_ADJUSTMENT', adjusted);
+  const discounted = applyTierDiscount(baseFee, appeal.tier);
+  ledger.record(appeal.id, 'TIER_DISCOUNT', discounted);
 
-  const total = applyTierDiscount(adjusted, appeal.tier);
-  ledger.record(appeal.id, 'TIER_DISCOUNT', total);
+  const total = applyRegionalAdjustment(discounted, appeal.region);
+  ledger.record(appeal.id, 'REGIONAL_ADJUSTMENT', total);
 
   return { caseId: appeal.id, baseFee, total };
 }
