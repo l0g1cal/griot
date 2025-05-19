@@ -12,6 +12,8 @@ export interface AppealCase {
   tier: ApplicantTier;
   region: Region;
   applicantName: string;
+  /** Used by household grouping to flag possible links — never to group. */
+  address?: string;
   grounds: string;
   status: CaseStatus;
   openedAt: string; // ISO date
@@ -22,5 +24,6 @@ export interface CaseDraft {
   tier: ApplicantTier;
   region: Region;
   applicantName: string;
+  address?: string;
   grounds: string;
 }
