@@ -14,9 +14,10 @@ as one unit.
    a declared partner or a joint account. Links are declared by the
    applicant or recorded by a case officer; they are never inferred.
 3. **Links are transitive.** If A is linked to B and B to C, all three form
-   one household.
-4. One household, one combined assessment: all members' payslips feed the
-   household's Income Assessment.
+   one household unit.
+4. One household unit, one combined assessment: all members' payslips feed
+   the household unit's Income Assessment, and a joint assessment is
+   recorded against every member Case.
 
 ## Code
 
