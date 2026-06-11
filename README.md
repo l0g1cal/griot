@@ -29,6 +29,18 @@ npm run generate       # … and the rules now mark the null check a verified ac
 
 `tacit/knowledge/graph.seed.json` is the pre-seeded graph for the staged UI: contexts, glossary (with the Ticket/Case alias), claims with provenance + confidence, and the open-questions queue.
 
+## The UI
+
+```sh
+cd tacit/ui
+npm install   # first time only
+npm run dev   # http://localhost:5173
+```
+
+Four tabs: **Domain Model** (bounded contexts, glossary, terminology traps), **Claims** (provenance badges + confidence bars), **Open Questions** (the honesty moment — answer q-001 in the form, prefilled with Dan Okafor from blame routing), and **Generated Rules** (live contents of `appeals-service/CLAUDE.md`).
+
+The UI is read-only over the graph except for one mutation: the answer form posts to a dev-server endpoint that invokes the same `answer-question.mjs` + `generate-rules.mjs` scripts as the CLI — so answering on camera really rewrites `CLAUDE.md` on disk (flip to the Generated Rules tab to show it). The **↺ Reset demo** button in the header restores the seed state between takes.
+
 ## Recording the money shot
 
 Same prompt, twice — the only variable is Tacit's generated context.
