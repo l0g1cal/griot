@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { assessTier } from '../src/assessment/incomeAssessment';
+import { assessHousehold, assessTier } from '../src/assessment/incomeAssessment';
 import { weeklyEquivalentPence, type Payslip } from '../src/assessment/payslip';
 
 let seq = 0;
@@ -74,5 +74,15 @@ describe('assessTier', () => {
     const result = assessTier('CASE-000001', [slip({ netPence: 10_000, payDate: '2025-01-02' })], AS_OF);
     expect(result.payslipsConsidered).toBe(0);
     expect(result.tier).toBe('standard');
+  });
+});
+
+describe('assessHousehold', () => {
+  it('records the same joint assessment against every member case', () => {
+    const payslips = [slip({ netPence: 30_000 })];
+    const results = assessHousehold(['CASE-000001', 'CASE-000002'], payslips, AS_OF);
+    expect(results.map((r) => r.caseId)).toEqual(['CASE-000001', 'CASE-000002']);
+    expect(new Set(results.map((r) => r.weeklyNetPence)).size).toBe(1);
+    expect(new Set(results.map((r) => r.tier)).size).toBe(1);
   });
 });

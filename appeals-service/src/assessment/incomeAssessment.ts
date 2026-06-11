@@ -50,6 +50,16 @@ export function assessTier(caseId: string, payslips: Payslip[], asOf: Date = new
   };
 }
 
+/**
+ * Joint assessment for a household unit: one IncomeAssessment is recorded
+ * against EVERY member Case (same combined figures) rather than as a shared
+ * household record — each Case file stays self-contained for tribunal
+ * review (specs/functions/household-grouping.md §4).
+ */
+export function assessHousehold(memberCaseIds: string[], payslips: Payslip[], asOf: Date = new Date()): IncomeAssessment[] {
+  return memberCaseIds.map((caseId) => assessTier(caseId, payslips, asOf));
+}
+
 function tierFor(weeklyNet: Pence, evidenceCount: number): ApplicantTier {
   // No evidence in the window: assess at standard, never guess a lower tier.
   if (evidenceCount === 0) return 'standard';
