@@ -2,8 +2,13 @@ import type { ApplicantTier } from '../intake/case';
 import type { Pence } from '../shared/money';
 import { weeklyEquivalentPence, type Payslip } from './payslip';
 
-/** Lookback window for assessable income (specs/functions/income-assessment.md §2). */
-const LOOKBACK_WEEKS = 13;
+/**
+ * Lookback window for assessable income. The spec says 13 weeks
+ * (specs/functions/income-assessment.md §2); TEMPORARILY capped at 8 while
+ * the payslip backfill (DAT-512) completes — slips ingested before
+ * 2026-04-15 have unreliable pay dates. Restore to 13 when DAT-512 lands.
+ */
+const LOOKBACK_WEEKS = 8;
 
 /** Weekly net thresholds, MT-4 Sch. 1 (April 2025 rates). */
 const HARDSHIP_WEEKLY_NET: Pence = 21_500;
