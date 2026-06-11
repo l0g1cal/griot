@@ -1,9 +1,9 @@
 {
-  "name": "tacit",
+  "name": "groit",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Tacit — living domain knowledge layer. Knowledge graph + agent rules generator.",
+  "description": "Groit — living domain knowledge layer. Knowledge graph + agent rules generator.",
   "scripts": {
     "generate": "node generate-rules.mjs",
     "answer": "node answer-question.mjs",

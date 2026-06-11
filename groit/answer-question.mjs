@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Tacit flywheel step: a human answers an open question.
+ * Groit flywheel step: a human answers an open question.
  *
  * Marks the question answered, writes the answer back into the graph as a
  * human-verified claim (confidence 100%), and reminds you to regenerate

@@ -5,14 +5,14 @@ import { execFile } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const TACIT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const GRAPH = join(TACIT, 'knowledge', 'graph.json');
-const SEED = join(TACIT, 'knowledge', 'graph.seed.json');
-const RULES = join(TACIT, '..', 'appeals-service', 'CLAUDE.md');
+const GROIT = join(dirname(fileURLToPath(import.meta.url)), '..');
+const GRAPH = join(GROIT, 'knowledge', 'graph.json');
+const SEED = join(GROIT, 'knowledge', 'graph.seed.json');
+const RULES = join(GROIT, '..', 'appeals-service', 'CLAUDE.md');
 
 function run(script, args = []) {
   return new Promise((resolve, reject) => {
-    execFile(process.execPath, [join(TACIT, script), ...args], { cwd: TACIT }, (err, stdout, stderr) =>
+    execFile(process.execPath, [join(GROIT, script), ...args], { cwd: GROIT }, (err, stdout, stderr) =>
       err ? reject(new Error(stderr || stdout || err.message)) : resolve(stdout),
     );
   });
@@ -42,9 +42,9 @@ function ensureGraph() {
  * terminal demo uses, so the on-screen interaction exercises the real write
  * path and really regenerates CLAUDE.md / .cursor rules on disk.
  */
-function tacitApi() {
+function groitApi() {
   return {
-    name: 'tacit-api',
+    name: 'groit-api',
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
         if (!req.url.startsWith('/api/')) return next();
@@ -76,5 +76,5 @@ function tacitApi() {
 }
 
 export default defineConfig({
-  plugins: [react(), tacitApi()],
+  plugins: [react(), groitApi()],
 });

@@ -56,7 +56,7 @@ export default function App() {
       <header>
         <div>
           <h1>
-            Tacit <span className="project">/ {graph.project}</span>
+            Groit <span className="project">/ {graph.project}</span>
           </h1>
           <p className="tagline">The living domain knowledge layer — what the code can't tell you, and what nobody knows yet.</p>
         </div>

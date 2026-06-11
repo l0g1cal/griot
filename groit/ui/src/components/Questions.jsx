@@ -58,7 +58,7 @@ export default function Questions({ graph, onAnswer }) {
     <div>
       <h2>Open questions</h2>
       <p className="hint">
-        Where the code looks intentional but no trace explains it, Tacit doesn't guess — it asks, and routes the
+        Where the code looks intentional but no trace explains it, Groit doesn't guess — it asks, and routes the
         question to the likeliest knower via git history. Until answered, agents are told to treat the code as
         intentional.
       </p>
@@ -75,7 +75,7 @@ export default function Questions({ graph, onAnswer }) {
           <p className="statement">{q.question}</p>
           {q.hypothesis && (
             <p className="why">
-              <strong>Tacit's read:</strong> {q.hypothesis}
+              <strong>Groit's read:</strong> {q.hypothesis}
             </p>
           )}
           <div className="claim-foot">
