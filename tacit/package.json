@@ -1,0 +1,12 @@
+{
+  "name": "tacit",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Tacit — living domain knowledge layer. Knowledge graph + agent rules generator.",
+  "scripts": {
+    "generate": "node generate-rules.mjs",
+    "answer": "node answer-question.mjs",
+    "reset": "cp knowledge/graph.seed.json knowledge/graph.json && echo 'graph.json reset to seed' && node generate-rules.mjs"
+  }
+}
