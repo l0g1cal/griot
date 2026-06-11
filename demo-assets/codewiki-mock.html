@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>appeals-service · CodeWiki</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --sidebar: #f7f7f9;
+    --border: #e4e4ea;
+    --text: #1c1c28;
+    --muted: #6b6b80;
+    --accent: #6d4aff;
+    --accent-soft: #f1edff;
+    --code-bg: #f4f4f7;
+    --callout: #eef6ff;
+    --callout-border: #b7d8ff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-size: 15px; line-height: 1.6;
+  }
+  .layout { display: flex; min-height: 100vh; }
+
+  /* Sidebar */
+  aside {
+    width: 270px; flex-shrink: 0; background: var(--sidebar);
+    border-right: 1px solid var(--border); padding: 18px 0;
+    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 8px;
+    padding: 0 18px 14px; border-bottom: 1px solid var(--border);
+    font-weight: 800; font-size: 16px; letter-spacing: -0.3px;
+  }
+  .brand .logo {
+    width: 24px; height: 24px; border-radius: 6px; background: var(--accent);
+    color: #fff; display: inline-flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 800;
+  }
+  .repo {
+    margin: 14px 18px 6px; padding: 10px 12px; background: #fff;
+    border: 1px solid var(--border); border-radius: 8px; font-size: 13.5px;
+  }
+  .repo .name { font-weight: 700; }
+  .repo .meta { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .search {
+    margin: 10px 18px; padding: 7px 12px; border: 1px solid var(--border);
+    border-radius: 8px; color: var(--muted); font-size: 13px; background: #fff;
+  }
+  nav.pages { margin-top: 10px; }
+  nav.pages .group { padding: 10px 18px 4px; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
+  nav.pages a {
+    display: block; padding: 6px 18px 6px 26px; color: var(--text);
+    text-decoration: none; font-size: 13.5px; border-left: 2px solid transparent;
+  }
+  nav.pages a.active { background: var(--accent-soft); border-left-color: var(--accent); color: var(--accent); font-weight: 600; }
+  nav.pages a:hover { background: #efeff4; }
+
+  /* Main */
+  main { flex: 1; max-width: 860px; padding: 28px 48px 120px; }
+  .crumbs { color: var(--muted); font-size: 13px; margin-bottom: 4px; }
+  .crumbs b { color: var(--text); }
+  .gen-banner {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--accent-soft); color: #4d33c4; border-radius: 8px;
+    padding: 8px 14px; font-size: 13px; margin: 14px 0 26px;
+  }
+  h1 { font-size: 30px; letter-spacing: -0.7px; margin: 6px 0 4px; }
+  h2 { font-size: 21px; letter-spacing: -0.4px; margin: 38px 0 10px; padding-top: 18px; border-top: 1px solid var(--border); }
+  h3 { font-size: 16px; margin: 24px 0 8px; }
+  p { margin: 10px 0; }
+  .muted { color: var(--muted); }
+  code {
+    background: var(--code-bg); border-radius: 5px; padding: 1px 6px;
+    font-family: 'SF Mono', ui-monospace, Menlo, monospace; font-size: 13px;
+  }
+  pre {
+    background: var(--code-bg); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px 18px; overflow-x: auto; font-size: 13px; line-height: 1.55;
+    font-family: 'SF Mono', ui-monospace, Menlo, monospace;
+  }
+  pre code { background: none; padding: 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 12px 0; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.6px; }
+  .callout {
+    background: var(--callout); border: 1px solid var(--callout-border);
+    border-radius: 10px; padding: 12px 16px; margin: 14px 0; font-size: 14px;
+  }
+  .callout .tag { font-weight: 700; color: #1d6fd6; }
+
+  /* Diagram */
+  .diagram {
+    border: 1px solid var(--border); border-radius: 12px; padding: 26px;
+    margin: 16px 0; display: flex; flex-direction: column; align-items: center; gap: 14px;
+    background: #fcfcfe;
+  }
+  .diagram .row { display: flex; gap: 18px; flex-wrap: wrap; justify-content: center; }
+  .node {
+    border: 1.5px solid #c9c2f2; background: #fff; border-radius: 10px;
+    padding: 10px 18px; font-size: 13px; font-weight: 600; text-align: center;
+    box-shadow: 0 1px 2px rgba(60, 40, 160, 0.07);
+  }
+  .node small { display: block; font-weight: 400; color: var(--muted); font-size: 11.5px; }
+  .arrow { color: #a59ad6; font-size: 18px; align-self: center; }
+  .footer-note { margin-top: 60px; color: var(--muted); font-size: 12.5px; border-top: 1px solid var(--border); padding-top: 14px; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside>
+    <div class="brand"><span class="logo">⌬</span> CodeWiki</div>
+    <div class="repo">
+      <div class="name">kestrel/appeals-service</div>
+      <div class="meta">23 files indexed · TypeScript · re-indexed 2 hours ago</div>
+    </div>
+    <div class="search">🔍&nbsp; Ask anything about this repo…</div>
+    <nav class="pages">
+      <div class="group">Pages</div>
+      <a class="active" href="#overview">Overview</a>
+      <a href="#architecture">Architecture</a>
+      <a href="#flows">Core flows</a>
+      <a href="#data-model">Data model</a>
+      <div class="group">Module reference</div>
+      <a href="#mod-intake">src/intake</a>
+      <a href="#mod-pricing">src/pricing</a>
+      <a href="#mod-legacy">src/legacy</a>
+      <a href="#mod-review">src/review</a>
+      <a href="#mod-notifications">src/notifications</a>
+      <div class="group">Quality</div>
+      <a href="#testing">Testing</a>
+    </nav>
+  </aside>
+
+  <main>
+    <div class="crumbs">CodeWiki / <b>kestrel/appeals-service</b> / Overview</div>
+    <h1>appeals-service</h1>
+    <div class="gen-banner">✨ This documentation was generated automatically from the repository source. Last indexed: 2 hours ago.</div>
+
+    <section id="overview">
+      <p><strong>appeals-service</strong> is a TypeScript backend service for managing tribunal appeals. It handles the full appeal lifecycle: intake and validation of new cases, filing-fee calculation, a prioritized review queue, decision recording, and applicant notifications. A dedicated adapter layer integrates records from a legacy ticketing system.</p>
+      <table>
+        <tr><th>Module</th><th>Responsibility</th><th>Key exports</th></tr>
+        <tr><td><code>src/intake</code></td><td>Case creation, validation, lifecycle</td><td><code>submitCase</code>, <code>validateDraft</code>, <code>AppealCase</code></td></tr>
+        <tr><td><code>src/pricing</code></td><td>Filing-fee computation and audit logging</td><td><code>calculateFilingFee</code>, <code>AuditLedger</code></td></tr>
+        <tr><td><code>src/legacy</code></td><td>Read-only access to the legacy ticket export</td><td><code>ticketToCase</code>, <code>openTickets</code></td></tr>
+        <tr><td><code>src/review</code></td><td>Review queue and decisions</td><td><code>enqueue</code>, <code>nextForReview</code>, <code>recordDecision</code></td></tr>
+        <tr><td><code>src/notifications</code></td><td>Outbound applicant messages</td><td><code>notify</code>, <code>submissionReceived</code>, <code>decisionIssued</code></td></tr>
+        <tr><td><code>src/shared</code></td><td>Money arithmetic (integer pence), ID generation</td><td><code>applyRate</code>, <code>newCaseId</code></td></tr>
+      </table>
+    </section>
+
+    <section id="architecture">
+      <h2>Architecture</h2>
+      <p>The service follows a modular layout with unidirectional dependencies. <code>shared</code> sits at the bottom; <code>pricing</code>, <code>review</code> and <code>notifications</code> depend on the case model defined in <code>intake</code>; <code>legacy</code> adapts external records into that model.</p>
+      <div class="diagram">
+        <div class="row">
+          <div class="node">src/legacy<small>Ticket store + adapter</small></div>
+          <div class="arrow">→</div>
+          <div class="node">src/intake<small>AppealCase model + lifecycle</small></div>
+          <div class="arrow">→</div>
+          <div class="node">src/review<small>queue + decisions</small></div>
+        </div>
+        <div class="row">
+          <div class="node">src/pricing<small>fees + audit ledger</small></div>
+          <div class="node">src/notifications<small>outbox</small></div>
+          <div class="node">src/shared<small>money, ids</small></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="flows">
+      <h2>Core flows</h2>
+
+      <h3>Case submission</h3>
+      <p><code>submitCase(draft)</code> validates the draft via <code>validateDraft</code> (required applicant name, grounds between 20 and 4,000 characters), assigns a sequential <code>CASE-NNNNNN</code> id, stamps <code>openedAt</code>, and stores the case as <code>submitted</code>.</p>
+
+      <h3>Fee calculation</h3>
+      <p><code>calculateFilingFee(appeal, ledger)</code> computes the filing fee in three steps, recording each intermediate value to the <code>AuditLedger</code>:</p>
+      <pre><code>baseFee   = BASE_FEES[appeal.category]        // parking £120, licensing £180, planning £260
+discounted = applyTierDiscount(baseFee, tier)  // standard 0%, concession 25%, hardship 50%
+total      = applyRegionalAdjustment(discounted, region) // metro +10%, regional +5%, remote 0%</code></pre>
+      <div class="callout"><span class="tag">💡 Insight</span> Both <code>applyTierDiscount</code> and <code>applyRegionalAdjustment</code> are multiplicative factors applied via <code>applyRate</code>, so they are commutative — the order in which they are applied does not affect the final total. The current sequence appears to be an arbitrary implementation choice.</div>
+
+      <h3>Review &amp; decision</h3>
+      <p><code>enqueue</code> accepts only <code>submitted</code> cases and sorts the queue so hardship-tier cases are served first by <code>nextForReview</code>. <code>recordDecision</code> marks the case <code>decided</code> and produces a <code>Decision</code> record; <code>decisionIssued</code> renders the applicant letter.</p>
+    </section>
+
+    <section id="data-model">
+      <h2>Data model</h2>
+      <p>The system manages <strong>two primary record types</strong>:</p>
+      <table>
+        <tr><th>Entity</th><th>Module</th><th>Description</th></tr>
+        <tr><td><code>AppealCase</code></td><td><code>src/intake</code></td><td>An appeal submitted through the modern intake flow, with <code>category</code>, <code>tier</code>, <code>region</code>, <code>grounds</code> and a four-state lifecycle (<code>draft → submitted → under-review → decided</code>).</td></tr>
+        <tr><td><code>Ticket</code></td><td><code>src/legacy</code></td><td>A record from the legacy ticketing system with its own schema: <code>kind</code>, <code>band</code> (A/B/C), <code>zone</code> (1–3), <code>holder</code>, <code>body</code> and an OPEN/CLOSED <code>state</code>. Refreshed nightly from a snapshot export.</td></tr>
+      </table>
+      <p><code>ticketToCase</code> converts Tickets into AppealCases for processing, mapping legacy field codes onto the intake vocabulary via lookup tables (<code>KIND_TO_CATEGORY</code>, <code>BAND_TO_TIER</code>, <code>ZONE_TO_REGION</code>).</p>
+    </section>
+
+    <section id="mod-intake">
+      <h2>Module reference</h2>
+      <h3 id="mod-intake-h">src/intake</h3>
+      <p><code>case.ts</code> defines the <code>AppealCase</code> interface and its enums. <code>caseValidator.ts</code> performs draft validation and returns a structured <code>ValidationResult</code>. <code>caseService.ts</code> owns the in-memory case registry.</p>
+
+      <h3 id="mod-pricing">src/pricing</h3>
+      <p><code>feeSchedule.ts</code> holds the fee tables as plain records. <code>discounts.ts</code> and <code>regional.ts</code> each export a single pure function over integer pence. <code>auditLedger.ts</code> implements an append-only <code>AuditLedger</code> class with a <code>exportForRegulator()</code> accessor used by quarterly reporting. <code>feeCalculator.ts</code> orchestrates the pipeline described above.</p>
+
+      <h3 id="mod-legacy">src/legacy</h3>
+      <p><code>ticketStore.ts</code> exposes the nightly snapshot through <code>openTickets()</code> and <code>findTicket()</code>. <code>ticketAdapter.ts</code> normalizes legacy references (<code>TKT-*</code> → <code>CASE-LEG-*</code>) and includes a defensive null check on the normalized reference before constructing the case — a robustness guard against malformed legacy records, consistent with defensive-programming practice at integration boundaries.</p>
+
+      <h3 id="mod-review">src/review</h3>
+      <p><code>reviewQueue.ts</code> maintains a priority-ordered in-memory queue. <code>decision.ts</code> guards against double decisions and timestamps outcomes.</p>
+
+      <h3 id="mod-notifications">src/notifications</h3>
+      <p><code>templates.ts</code> renders submission and decision letters; <code>notifier.ts</code> queues them in an outbox for the per-environment delivery worker.</p>
+    </section>
+
+    <section id="testing">
+      <h2>Testing</h2>
+      <p>The suite (Vitest, 12 tests across 4 files) covers fee totals for representative category/tier/region combinations, ledger entry counts, intake validation rules, and legacy adapter mappings. Coverage of the pricing module is strong: every tier and region factor is exercised through <code>calculateFilingFee</code>.</p>
+    </section>
+
+    <div class="footer-note">⌬ CodeWiki · Generated from source at commit <code>78eb6c5</code> · Structure extracted via AST analysis; descriptions AI-generated. <em>(Demo mock-up — static page styled after AI repo-documentation tools, for video recording only.)</em></div>
+  </main>
+</div>
+</body>
+</html>

@@ -41,6 +41,16 @@ Four tabs: **Domain Model** (bounded contexts, glossary, terminology traps), **C
 
 The UI is read-only over the graph except for one mutation: the answer form posts to a dev-server endpoint that invokes the same `answer-question.mjs` + `generate-rules.mjs` scripts as the CLI — so answering on camera really rewrites `CLAUDE.md` on disk (flip to the Generated Rules tab to show it). The **↺ Reset demo** button in the header restores the seed state between takes.
 
+## The hook beat (0:00–0:40): "what" tools miss the "why"
+
+Open `demo-assets/codewiki-mock.html` in a browser — a static mock-up styled after AI repo-documentation tools (deliberately generic branding, not DeepWiki's). Its content is accurate about structure and confidently wrong about all three landmines, one narration line each:
+
+- The fee pipeline gets an "💡 Insight" callout: *"the order … does not affect the final total … an arbitrary implementation choice"* — true for the total, fatal for the audit.
+- The data model presents `AppealCase` and `Ticket` as **two primary record types** — modelling one concept as two.
+- The dead null check is explained away as *"defensive programming practice at integration boundaries"* — a fabricated why.
+
+Narration: "Accurate structure. Confident prose. Wrong about everything that matters."
+
 ## Recording the money shot
 
 Same prompt, twice — the only variable is Groit's generated context.
