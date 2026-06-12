@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Griot — architecture</title>
+    <style>
+      :root {
+        --bg: #0e1117;
+        --panel: #161b24;
+        --panel-2: #1c2330;
+        --border: #2a3344;
+        --text: #dde3ee;
+        --muted: #8b96a8;
+        --accent: #5eb1ff;
+        --green: #3ecf8e;
+        --amber: #f0b429;
+        --red: #ff6b6b;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: var(--bg);
+        overflow: hidden;
+      }
+      body {
+        font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+        color: var(--text);
+      }
+
+      .deck {
+        width: 1600px;
+        height: 900px;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform-origin: center;
+      }
+
+      .title {
+        position: absolute;
+        left: 70px;
+        top: 44px;
+      }
+      .title h1 {
+        margin: 0;
+        font-size: 38px;
+        letter-spacing: -1px;
+      }
+      .title h1 span {
+        color: var(--accent);
+      }
+      .title p {
+        margin: 5px 0 0;
+        color: var(--muted);
+        font-size: 18px;
+      }
+
+      .cols {
+        position: absolute;
+        top: 165px;
+        left: 70px;
+        right: 70px;
+        display: grid;
+        grid-template-columns: 320px 56px 1fr 56px 430px;
+        gap: 0;
+        align-items: stretch;
+      }
+      .col h3 {
+        margin: 0 0 12px;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        color: var(--muted);
+        font-weight: 700;
+      }
+      .arrowcol {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #3d5374;
+        font-size: 38px;
+      }
+
+      .card {
+        background: var(--panel);
+        border: 1.5px solid var(--border);
+        border-radius: 14px;
+        padding: 16px 18px;
+        margin-bottom: 14px;
+      }
+      .card h4 {
+        margin: 0 0 5px;
+        font-size: 17px;
+      }
+      .card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.45;
+      }
+      .card p b {
+        color: var(--text);
+        font-weight: 600;
+      }
+
+      .core .card.det {
+        border-color: rgba(94, 177, 255, 0.55);
+      }
+      .core .card.prob {
+        border-color: rgba(240, 180, 41, 0.55);
+      }
+      .core .joint {
+        text-align: center;
+        color: var(--muted);
+        font-size: 13.5px;
+        margin: -6px 0 10px;
+      }
+      .core .joint b {
+        color: var(--amber);
+        font-weight: 600;
+      }
+      .tag {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.8px;
+        border-radius: 5px;
+        padding: 2px 8px;
+        margin-bottom: 7px;
+      }
+      .tag.det {
+        background: rgba(94, 177, 255, 0.15);
+        color: var(--accent);
+      }
+      .tag.prob {
+        background: rgba(240, 180, 41, 0.15);
+        color: var(--amber);
+      }
+      .tag.push {
+        background: rgba(62, 207, 142, 0.15);
+        color: var(--green);
+      }
+      .tag.pull {
+        background: rgba(255, 107, 107, 0.15);
+        color: var(--red);
+      }
+
+      .legend {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+      .chip {
+        font-size: 12.5px;
+        border-radius: 6px;
+        padding: 2px 9px;
+        white-space: nowrap;
+        background: var(--panel-2);
+        border: 1px solid var(--border);
+        color: var(--muted);
+      }
+      .chip.h {
+        color: var(--green);
+      }
+      .chip.t {
+        color: var(--accent);
+      }
+      .chip.c {
+        color: var(--muted);
+      }
+
+      .delivery .card {
+        margin-bottom: 12px;
+        padding: 13px 16px;
+      }
+      .delivery .card h4 {
+        font-size: 15.5px;
+      }
+      .delivery .card p {
+        font-size: 13px;
+      }
+
+      .scaling {
+        position: absolute;
+        left: 70px;
+        right: 70px;
+        bottom: 44px;
+        background: rgba(94, 177, 255, 0.07);
+        border: 1px solid rgba(94, 177, 255, 0.35);
+        border-radius: 14px;
+        padding: 16px 24px;
+        display: flex;
+        gap: 36px;
+        align-items: center;
+      }
+      .scaling .label {
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: var(--accent);
+        white-space: nowrap;
+      }
+      .scaling p {
+        margin: 0;
+        font-size: 14.5px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+      .scaling p b {
+        color: var(--text);
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="deck" id="deck">
+      <div class="title">
+        <h1><span>Griot</span> — architecture</h1>
+        <p>
+          deterministic structure · probabilistic knowledge · honest delivery
+        </p>
+      </div>
+
+      <div class="cols">
+        <div class="col">
+          <h3>Sources</h3>
+          <div class="card">
+            <h4>Repository</h4>
+            <p>source files, parsed every run</p>
+          </div>
+          <div class="card">
+            <h4>Project history</h4>
+            <p>commits, PR descriptions, review comments</p>
+          </div>
+          <div class="card">
+            <h4>People</h4>
+            <p>
+              answers to open questions, corrections in chat, modelling sessions
+            </p>
+          </div>
+        </div>
+
+        <div class="arrowcol">→</div>
+
+        <div class="col core">
+          <h3>The graph — system of record</h3>
+          <div class="card det">
+            <span class="tag det">DETERMINISTIC · REBUILT EVERY RUN</span>
+            <h4>Code graph</h4>
+            <p>
+              tree-sitter AST → symbols, references, call paths,
+              <b>content hashes</b>. Ground truth — structure is never
+              hallucinated.
+            </p>
+          </div>
+          <div class="joint">
+            claims anchor to symbols · hash mismatch ⇒ <b>flagged stale</b>,
+            never silently wrong
+          </div>
+          <div class="card prob">
+            <span class="tag prob"
+              >PROBABILISTIC · MERGE-ONLY, NEVER REGENERATED</span
+            >
+            <h4>Knowledge graph</h4>
+            <p>
+              claims, terms, contexts, <b>open questions</b> — each with
+              provenance, confidence, classification (invariant / accident /
+              unknown). Human-verified claims are immutable: provenance only
+              ratchets upward.
+            </p>
+            <div class="legend">
+              <span class="chip h">✅ human-verified</span>
+              <span class="chip t">🔗 trace-derived</span>
+              <span class="chip c">🤖 code-derived</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="arrowcol">→</div>
+
+        <div class="col delivery">
+          <h3>Delivery — a rendered, budgeted view</h3>
+          <div class="card">
+            <span class="tag push">PUSH · ALWAYS LOADED</span>
+            <h4>Root CLAUDE.md</h4>
+            <p>cross-cutting invariants, glossary core, open-question policy</p>
+          </div>
+          <div class="card">
+            <span class="tag push">PUSH · SCOPED</span>
+            <h4>Per-context rules</h4>
+            <p>
+              bounded contexts → nested CLAUDE.md + glob-scoped .cursor/rules,
+              mapped 1:1
+            </p>
+          </div>
+          <div class="card">
+            <span class="tag pull">PULL · ON DEMAND</span>
+            <h4>MCP server</h4>
+            <p>
+              the long tail, queried at suggestion time: “what do we know about
+              <b>calculateFilingFee</b>?”
+            </p>
+          </div>
+          <div class="card">
+            <span class="tag push">HUMANS</span>
+            <h4>Onboarding &amp; handover</h4>
+            <p>
+              guided domain model browser; transition docs generated, not
+              written
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="scaling">
+        <span class="label">Why it scales</span>
+        <p>
+          <b>Regeneration is free</b> — a template render, no LLM.
+          <b>Ingest is incremental</b> — a cursor over new commits, so cost
+          tracks <b>change velocity, not repo size</b>. And the context window
+          is protected: only high-severity knowledge is pushed; everything else
+          is pulled through MCP.
+        </p>
+      </div>
+    </div>
+    <script>
+      function fit() {
+        const s = Math.min(innerWidth / 1600, innerHeight / 900);
+        document.getElementById("deck").style.transform =
+          `translate(-50%, -50%) scale(${s})`;
+      }
+      addEventListener("resize", fit);
+      fit();
+    </script>
+  </body>
+</html>

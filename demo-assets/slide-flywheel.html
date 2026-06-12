@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Griot — the knowledge flywheel</title>
+    <style>
+      :root {
+        --bg: #0e1117;
+        --panel: #161b24;
+        --border: #2a3344;
+        --text: #dde3ee;
+        --muted: #8b96a8;
+        --accent: #5eb1ff;
+        --green: #3ecf8e;
+        --amber: #f0b429;
+        --red: #ff6b6b;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: var(--bg);
+        overflow: hidden;
+      }
+      body {
+        font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+        color: var(--text);
+      }
+
+      .deck {
+        width: 1600px;
+        height: 900px;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform-origin: center;
+      }
+      .title {
+        position: absolute;
+        left: 70px;
+        top: 48px;
+      }
+      .title h1 {
+        margin: 0;
+        font-size: 40px;
+        letter-spacing: -1px;
+      }
+      .title h1 span {
+        color: var(--accent);
+      }
+      .title p {
+        margin: 6px 0 0;
+        color: var(--muted);
+        font-size: 19px;
+      }
+
+      svg.arcs {
+        position: absolute;
+        inset: 0;
+      }
+      svg.arcs path {
+        fill: none;
+        stroke: #3d5374;
+        stroke-width: 5;
+        marker-end: url(#arr);
+      }
+
+      .node {
+        position: absolute;
+        width: 330px;
+        transform: translate(-50%, -50%);
+        background: var(--panel);
+        border: 1.5px solid var(--border);
+        border-radius: 16px;
+        padding: 18px 22px 16px;
+        text-align: center;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+      }
+      .node .step {
+        position: absolute;
+        top: -16px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--accent);
+        color: #06101c;
+        font-weight: 800;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .node h2 {
+        margin: 4px 0 6px;
+        font-size: 23px;
+        letter-spacing: 0.5px;
+      }
+      .node p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 15.5px;
+        line-height: 1.45;
+      }
+      .node p b {
+        color: var(--text);
+        font-weight: 600;
+      }
+      .n-hypothesize {
+        left: 800px;
+        top: 220px;
+        border-color: rgba(94, 177, 255, 0.45);
+      }
+      .n-ask {
+        left: 1090px;
+        top: 490px;
+        border-color: rgba(240, 180, 41, 0.5);
+      }
+      .n-ask .step {
+        background: var(--amber);
+      }
+      .n-verify {
+        left: 800px;
+        top: 762px;
+        border-color: rgba(62, 207, 142, 0.5);
+      }
+      .n-verify .step {
+        background: var(--green);
+      }
+      .n-feed {
+        left: 510px;
+        top: 490px;
+        border-color: rgba(255, 107, 107, 0.45);
+      }
+      .n-feed .step {
+        background: var(--red);
+        color: #1c0606;
+      }
+
+      .center {
+        position: absolute;
+        left: 800px;
+        top: 490px;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        width: 300px;
+      }
+      .center .word {
+        font-size: 26px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+      }
+      .center .sub {
+        color: var(--muted);
+        font-size: 14.5px;
+        margin-top: 4px;
+      }
+
+      .footer {
+        position: absolute;
+        left: 70px;
+        right: 70px;
+        bottom: 40px;
+        display: flex;
+        justify-content: space-between;
+        color: var(--muted);
+        font-size: 16.5px;
+      }
+      .footer b {
+        color: var(--green);
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="deck" id="deck">
+      <div class="title">
+        <h1><span>Griot</span> — the knowledge flywheel</h1>
+        <p>
+          not a documentation generator — every turn makes the next one smarter
+        </p>
+      </div>
+
+      <svg class="arcs" viewBox="0 0 1600 900">
+        <defs>
+          <marker
+            id="arr"
+            viewBox="0 0 10 10"
+            refX="8"
+            refY="5"
+            markerWidth="5"
+            markerHeight="5"
+            orient="auto-start-reverse"
+          >
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#3d5374" />
+          </marker>
+        </defs>
+        <path d="M 914 245 A 270 270 0 0 1 1045 376" />
+        <path d="M 1045 604 A 270 270 0 0 1 914 735" />
+        <path d="M 686 735 A 270 270 0 0 1 555 604" />
+        <path d="M 555 376 A 270 270 0 0 1 686 245" />
+      </svg>
+
+      <div class="node n-hypothesize">
+        <div class="step">1</div>
+        <h2>Hypothesize</h2>
+        <p>
+          ingest code + git history → draft domain model<br /><b
+            >provenance &amp; confidence on every claim</b
+          >
+        </p>
+      </div>
+
+      <div class="node n-ask">
+        <div class="step">2</div>
+        <h2>Ask</h2>
+        <p>
+          when the <i>why</i> is unknowable, don't guess — raise an
+          <b>open question</b>, routed via git blame
+        </p>
+      </div>
+
+      <div class="node n-verify">
+        <div class="step">3</div>
+        <h2>Verify</h2>
+        <p>
+          humans answer at natural moments →
+          <b>permanent, attributed claims</b> — never re-discovered
+        </p>
+      </div>
+
+      <div class="node n-feed">
+        <div class="step">4</div>
+        <h2>Feed</h2>
+        <p>
+          humans: onboarding &amp; handover docs<br />agents:
+          <b>CLAUDE.md · .cursor/rules · MCP</b>
+        </p>
+      </div>
+
+      <div class="center">
+        <div class="word">⟳</div>
+        <div class="sub">
+          code changes flag linked knowledge stale — the model stays alive
+        </div>
+      </div>
+
+      <div class="footer">
+        <span
+          >invariant — never touch&nbsp;&nbsp;·&nbsp;&nbsp;accident — safe to
+          refactor&nbsp;&nbsp;·&nbsp;&nbsp;unknown — ask first</span
+        >
+        <span
+          >the <b>human-verified delta</b> is the asset no code-only tool can
+          regenerate</span
+        >
+      </div>
+    </div>
+    <script>
+      function fit() {
+        const s = Math.min(innerWidth / 1600, innerHeight / 900);
+        document.getElementById("deck").style.transform =
+          `translate(-50%, -50%) scale(${s})`;
+      }
+      addEventListener("resize", fit);
+      fit();
+    </script>
+  </body>
+</html>
