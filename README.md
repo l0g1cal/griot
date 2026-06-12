@@ -7,11 +7,11 @@ Two pieces:
 
 ## The three landmines
 
-| # | Landmine | Where | The trace |
-|---|---|---|---|
-| 1 | **Compliance ordering.** `applyTierDiscount()` must run before `applyRegionalAdjustment()`. Both steps are multiplicative, so swapping them changes **no test result** — only the audit ledger lines the regulator reads. | `appeals-service/src/pricing/feeCalculator.ts` | Commit `5195ade` (PR #47, Priya Sharma): full FTC Reg 4.2 rationale in the commit body — and **only** there. |
-| 2 | **Terminology trap.** Legacy `Ticket` ≡ intake `Case` — same concept, two names (`band`↔`tier`, `zone`↔`region`, `body`↔`grounds`). | `appeals-service/src/legacy/` vs `src/intake/` | Commit `309fd26` (PR #61, Dan Okafor) bridges them; nothing states the equivalence explicitly. |
-| 3 | **Genuine accident.** A null check on `normalizeRef()`'s result that can never fire (`String.replace` always returns a string). No commit, PR, or comment explains it. | `appeals-service/src/legacy/ticketAdapter.ts` (`ticketToCase`) | None — that's the point. Groit raises open question **q-001**, routed to Dan Okafor via git blame. |
+| #   | Landmine                                                                                                                                                                                                                  | Where                                                          | The trace                                                                                                    |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| 1   | **Compliance ordering.** `applyTierDiscount()` must run before `applyRegionalAdjustment()`. Both steps are multiplicative, so swapping them changes **no test result** — only the audit ledger lines the regulator reads. | `appeals-service/src/pricing/feeCalculator.ts`                 | Commit `5195ade` (PR #47, Priya Sharma): full FTC Reg 4.2 rationale in the commit body — and **only** there. |
+| 2   | **Terminology trap.** Legacy `Ticket` ≡ intake `Case` — same concept, two names (`band`↔`tier`, `zone`↔`region`, `body`↔`grounds`).                                                                                       | `appeals-service/src/legacy/` vs `src/intake/`                 | Commit `309fd26` (PR #61, Dan Okafor) bridges them; nothing states the equivalence explicitly.               |
+| 3   | **Genuine accident.** A null check on `normalizeRef()`'s result that can never fire (`String.replace` always returns a string). No commit, PR, or comment explains it.                                                    | `appeals-service/src/legacy/ticketAdapter.ts` (`ticketToCase`) | None — that's the point. Groit raises open question **q-001**, routed to Dan Okafor via git blame.           |
 
 Verified properties: the test suite (12 tests) passes in **both** orderings of landmine 1 — checked across all 27 category/tier/region combinations.
 
@@ -40,27 +40,3 @@ npm run dev   # http://localhost:5173
 Four tabs: **Domain Model** (bounded contexts, glossary, terminology traps), **Claims** (provenance badges + confidence bars), **Open Questions** (the honesty moment — answer q-001 in the form, prefilled with Dan Okafor from blame routing), and **Generated Rules** (live contents of `appeals-service/CLAUDE.md`).
 
 The UI is read-only over the graph except for one mutation: the answer form posts to a dev-server endpoint that invokes the same `answer-question.mjs` + `generate-rules.mjs` scripts as the CLI — so answering on camera really rewrites `CLAUDE.md` on disk (flip to the Generated Rules tab to show it). The **↺ Reset demo** button in the header restores the seed state between takes.
-
-## The hook beat (0:00–0:40): "what" tools miss the "why"
-
-Open `demo-assets/codewiki-mock.html` in a browser — a static mock-up styled after AI repo-documentation tools (deliberately generic branding, not DeepWiki's). Its content is accurate about structure and confidently wrong about all three landmines, one narration line each:
-
-- The fee pipeline gets an "💡 Insight" callout: *"the order … does not affect the final total … an arbitrary implementation choice"* — true for the total, fatal for the audit.
-- The data model presents `AppealCase` and `Ticket` as **two primary record types** — modelling one concept as two.
-- The dead null check is explained away as *"defensive programming practice at integration boundaries"* — a fabricated why.
-
-Narration: "Accurate structure. Confident prose. Wrong about everything that matters."
-
-## Recording the money shot
-
-Same prompt, twice — the only variable is Groit's generated context.
-
-1. **Without Groit:** `rm appeals-service/CLAUDE.md && rm -rf appeals-service/.cursor`. Open Claude Code / Cursor in `appeals-service/` and prompt:
-   > Refactor src/pricing: apply the regional adjustment before the per-applicant tier discount so adjustments run most-general-first, and tidy up calculateFilingFee. Run the tests.
-   Expected: the agent reorders, all 12 tests pass, it reports success. (Audit just broke; nothing noticed.)
-2. **With Groit:** `cd groit && npm run reset` (regenerates `CLAUDE.md`), then the **same prompt**.
-   Expected: the agent refuses the reorder, citing **INV-1** and FTC Reg 4.2 / PR #47 by name.
-
-For the honesty beat, show `appeals-service/CLAUDE.md` before and after answering q-001: the item moves from *Open questions — ask a human* to *Verified accidents — safe to clean up*, attributed to Dan.
-
-After the demo, `git checkout -- appeals-service` and `npm run reset` restore everything.
