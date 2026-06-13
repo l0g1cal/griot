@@ -1,0 +1,415 @@
+{
+  "project": "appeals-service",
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-12T08:30:00.000Z",
+  "domains": [
+    {
+      "id": "dom-case",
+      "name": "Case",
+      "description": "A single appeal lodged by an applicant, from draft through decision. The canonical concept of the system — everything else hangs off a Case.",
+      "spec": "appeals-service/specs/domains/case.md",
+      "paths": ["appeals-service/specs/domains/case.md", "appeals-service/src/intake", "appeals-service/src/legacy"],
+      "attributes": [
+        { "name": "id", "meaning": "Case reference, CASE-nnnnnn; bridged legacy records use CASE-LEG-nnnnnn.", "code": "src/intake/case.ts#AppealCase" },
+        { "name": "category", "meaning": "What is being appealed: parking, licensing or planning.", "code": "src/intake/case.ts#CaseCategory" },
+        { "name": "tier", "meaning": "Fee category: standard, concession or hardship. Set by Income Assessment, never by the applicant.", "code": "src/intake/case.ts#ApplicantTier" },
+        { "name": "region", "meaning": "Where the matter arose; drives the regional fee levy.", "code": "src/intake/case.ts#Region" },
+        { "name": "grounds", "meaning": "The applicant's stated basis for the appeal. Legacy field name: 'body'.", "code": "src/intake/case.ts#AppealCase.grounds" },
+        { "name": "address", "meaning": "Used by household grouping to FLAG possible links — never to group.", "code": "src/intake/case.ts#AppealCase.address" },
+        { "name": "status", "meaning": "draft → submitted → under-review → decided.", "code": "src/intake/case.ts#CaseStatus" }
+      ],
+      "aliases": [
+        {
+          "term": "Ticket",
+          "where": "legacy module",
+          "note": "Same concept, legacy vocabulary. A bridged Ticket IS a Case; ticketAdapter translates band→tier, zone→region, body→grounds. Counting both sides double-counts appeals."
+        }
+      ],
+      "provenance": { "type": "trace", "source": "specs/domains/case.md (#78) + commit 309fd26 (#61)" },
+      "confidence": 0.92,
+      "rules": []
+    },
+    {
+      "id": "dom-correspondence",
+      "name": "Correspondence",
+      "description": "Any outbound message to an applicant about their Case: acknowledgements, fee notices, decision letters. Always queued through the outbox.",
+      "spec": "appeals-service/specs/domains/correspondence.md",
+      "paths": ["appeals-service/specs/domains/correspondence.md", "appeals-service/src/notifications"],
+      "attributes": [
+        { "name": "to", "meaning": "The applicant the message is addressed to.", "code": "src/notifications/notifier.ts#OutboundMessage" },
+        { "name": "body", "meaning": "Rendered message text, built from a template.", "code": "src/notifications/templates.ts" },
+        { "name": "queuedAt", "meaning": "When the message entered the outbox.", "code": "src/notifications/notifier.ts#OutboundMessage.queuedAt" }
+      ],
+      "aliases": [
+        {
+          "term": "Notification",
+          "where": "src/notifications module",
+          "note": "Same concept. Business says Correspondence; the code module keeps its name until the migration window (huddle decision, 2026-06-05)."
+        }
+      ],
+      "provenance": { "type": "human", "source": "huddle resolution 2026-06-05, recorded in specs/domains/correspondence.md (#78)" },
+      "confidence": 1,
+      "rules": [
+        {
+          "id": "r-cor-outbox",
+          "kind": "business-rule",
+          "classification": "invariant",
+          "statement": "All Correspondence is queued through the outbox — nothing is sent inline; every item must be reconstructable for the tribunal record.",
+          "why": "The delivery worker owns transport per environment, and the tribunal record requires every applicant-facing message to be replayable.",
+          "provenance": { "type": "trace", "source": "commit c25256f (#31) + specs/domains/correspondence.md", "author": "Sofia Lindqvist", "date": "2024-10-03" },
+          "confidence": 0.82,
+          "status": "hypothesis",
+          "codeLinks": [{ "file": "src/notifications/notifier.ts", "symbol": "notify" }]
+        }
+      ]
+    },
+    {
+      "id": "dom-assessment",
+      "name": "Assessment",
+      "description": "The means assessment of an applicant's income, which determines their fee tier. Evidence-based: computed from Payslips, never self-declared.",
+      "spec": "appeals-service/specs/domains/assessment.md",
+      "paths": ["appeals-service/specs/domains/assessment.md", "appeals-service/src/assessment/incomeAssessment.ts"],
+      "attributes": [
+        { "name": "weeklyNetPence", "meaning": "Assessed weekly net income, integer pence.", "code": "src/assessment/incomeAssessment.ts#IncomeAssessment.weeklyNetPence" },
+        { "name": "payslipsConsidered", "meaning": "How many payslips fell inside the lookback window.", "code": "src/assessment/incomeAssessment.ts#IncomeAssessment.payslipsConsidered" },
+        { "name": "tier", "meaning": "The resulting fee tier (standard / concession / hardship).", "code": "src/assessment/incomeAssessment.ts#IncomeAssessment.tier" }
+      ],
+      "aliases": [],
+      "provenance": { "type": "trace", "source": "specs/domains/assessment.md (#78) + commit c8fb462 (#84)" },
+      "confidence": 0.9,
+      "rules": []
+    },
+    {
+      "id": "dom-document",
+      "name": "Document",
+      "description": "A file uploaded as evidence on a Case: payslips, bank statements, decision letters, supporting evidence. The Document is the evidence; a Payslip is structured data extracted from it.",
+      "spec": "appeals-service/specs/domains/document.md",
+      "paths": ["appeals-service/specs/domains/document.md", "appeals-service/src/documents"],
+      "attributes": [
+        { "name": "kind", "meaning": "payslip, bank-statement, decision-letter or supporting-evidence — drives retention.", "code": "src/documents/document.ts#DocumentKind" },
+        { "name": "uploadedAt / uploadedBy", "meaning": "Provenance of the upload.", "code": "src/documents/document.ts#CaseDocument" }
+      ],
+      "aliases": [],
+      "provenance": { "type": "trace", "source": "specs/domains/document.md (#78) + commit 1611fd6 (#91)" },
+      "confidence": 0.9,
+      "rules": [
+        {
+          "id": "r-doc-retention",
+          "kind": "business-rule",
+          "classification": "invariant",
+          "statement": "Financial evidence (payslip, bank-statement, supporting-evidence) is purged 730 days after case CLOSURE; decision letters are kept 7 years. The purge clock starts at closure, not upload.",
+          "why": "DPIA-2025-014: financial evidence is personal data held only as long as an appeal can be reopened; decision letters are part of the tribunal record.",
+          "provenance": { "type": "trace", "source": "commit 1611fd6 (#91)", "author": "Sofia Lindqvist", "date": "2025-06-02" },
+          "confidence": 0.9,
+          "status": "hypothesis",
+          "codeLinks": [{ "file": "src/documents/document.ts", "symbol": "RETENTION_AFTER_CLOSURE_DAYS" }]
+        }
+      ]
+    },
+    {
+      "id": "dom-payslip",
+      "name": "Payslip",
+      "description": "Structured pay data extracted from an uploaded payslip Document. The evidence base for Income Assessment.",
+      "spec": "appeals-service/specs/domains/payslip.md",
+      "paths": ["appeals-service/specs/domains/payslip.md", "appeals-service/src/assessment/payslip.ts"],
+      "attributes": [
+        { "name": "payDate", "meaning": "The pay date ON THE SLIP — the lookback window filters on this, not the upload date.", "code": "src/assessment/payslip.ts#Payslip.payDate" },
+        { "name": "grossPence / netPence", "meaning": "Gross and net pay for the period, integer pence. Assessment uses NET.", "code": "src/assessment/payslip.ts#Payslip" },
+        { "name": "frequency", "meaning": "weekly, fortnightly or monthly — drives weekly-equivalent conversion.", "code": "src/assessment/payslip.ts#PayFrequency" }
+      ],
+      "aliases": [],
+      "provenance": { "type": "trace", "source": "specs/domains/payslip.md (#78) + commit c8fb462 (#84)" },
+      "confidence": 0.9,
+      "rules": []
+    }
+  ],
+  "functions": [
+    {
+      "id": "fn-search",
+      "name": "Search",
+      "description": "Finds Cases across the whole estate — intake cases AND records bridged from the legacy ticketing system — as one result set.",
+      "spec": "appeals-service/specs/functions/search.md",
+      "paths": ["appeals-service/specs/functions/search.md", "appeals-service/src/search", "appeals-service/src/legacy/ticketAdapter.ts"],
+      "rules": [
+        {
+          "id": "r-se-dedupe",
+          "kind": "business-rule",
+          "classification": "invariant",
+          "statement": "Search returns ONE result set deduplicated by normalized reference — a bridged legacy Ticket IS a Case and must never appear twice.",
+          "why": "Ticket and Case are the same domain concept under two names (#61). Treating them as distinct double-counts appeals in results and reports.",
+          "provenance": { "type": "trace", "source": "commit 5e17b72 (#94) + commit 309fd26 (#61)", "author": "Marcus Webb", "date": "2025-06-16" },
+          "confidence": 0.92,
+          "status": "hypothesis",
+          "codeLinks": [
+            { "file": "src/search/caseSearch.ts", "symbol": "searchCases" },
+            { "file": "src/legacy/ticketAdapter.ts", "symbol": "ticketToCase" }
+          ]
+        },
+        {
+          "id": "r-se-schemes",
+          "kind": "business-rule",
+          "classification": "invariant",
+          "statement": "A query in either reference scheme (TKT-000482 / CASE-LEG-000482) must find the same record.",
+          "why": "Case officers still quote legacy refs from old paperwork; search must not care which scheme they use.",
+          "provenance": { "type": "trace", "source": "commit 5e17b72 (#94)", "author": "Marcus Webb", "date": "2025-06-16" },
+          "confidence": 0.86,
+          "status": "hypothesis",
+          "codeLinks": [{ "file": "src/search/caseSearch.ts", "symbol": "refVariants" }]
+        }
+      ]
+    },
+    {
+      "id": "fn-household-grouping",
+      "name": "Household Grouping",
+      "description": "Groups related Cases into a household over declared financial links, so Income Assessment can assess combined household income.",
+      "spec": "appeals-service/specs/functions/household-grouping.md",
+      "paths": ["appeals-service/specs/functions/household-grouping.md", "appeals-service/src/household"],
+      "rules": [
+        {
+          "id": "r-hh-link",
+          "kind": "business-rule",
+          "classification": "invariant",
+          "statement": "A shared address NEVER forms a household on its own — grouping requires a DECLARED financial link (declared partner or joint account). Address may only flag a possible link for officer review.",
+          "why": "UAT incident 2025-05-09: four unrelated HMO tenants were grouped and their incomes combined, wrongly assessing all four at standard tier. Policy position confirmed with the client: cohabitation is not a household.",
+          "provenance": { "type": "trace", "source": "commit 6d12f2e (#86) + commit 971ea4e (#88)", "author": "Amara Diallo", "date": "2025-05-14" },
+          "confidence": 0.95,
+          "status": "hypothesis",
+          "codeLinks": [
+            { "file": "src/household/householdGrouping.ts", "symbol": "groupHouseholds" },
+            { "file": "src/household/householdGrouping.ts", "symbol": "possibleLinksToReview" }
+          ]
+        },
+        {
+          "id": "r-hh-transitive",
+          "kind": "business-rule",
+          "classification": "invariant",
+          "statement": "Financial links are transitive: if A links to B and B to C, all three form one household.",
+          "why": "Spec §3 — a household is the connected set of financially linked applicants, however the links were declared.",
+          "provenance": { "type": "trace", "source": "commit 6d12f2e (#86)", "author": "Amara Diallo", "date": "2025-05-14" },
+          "confidence": 0.85,
+          "status": "hypothesis",
+          "codeLinks": [{ "file": "src/household/householdGrouping.ts", "symbol": "groupHouseholds" }]
+        }
+      ]
+    },
+    {
+      "id": "fn-income-assessment",
+      "name": "Income Assessment",
+      "description": "Determines an applicant's fee tier from the net income evidenced by their Payslips. Tier drives the filing fee discount.",
+      "spec": "appeals-service/specs/functions/income-assessment.md",
+      "paths": ["appeals-service/specs/functions/income-assessment.md", "appeals-service/src/assessment"],
+      "rules": [
+        {
+          "id": "r-ia-net",
+          "kind": "business-rule",
+          "classification": "invariant",
+          "statement": "Assessment uses NET pay, never gross.",
+          "why": "Policy decision PO-2231 (2025-04-02): deductions at source vary by employer scheme (salary sacrifice, court orders, pension rates), so gross figures are not comparable across applicants.",
+          "provenance": { "type": "trace", "source": "commit c4af2fa (#81)", "author": "Amara Diallo", "date": "2025-04-21" },
+          "confidence": 0.93,
+          "status": "hypothesis",
+          "codeLinks": [{ "file": "src/assessment/incomeAssessment.ts", "symbol": "assessTier" }]
+        },
+        {
+          "id": "r-ia-lookback",
+          "kind": "business-rule",
+          "classification": "invariant",
+          "statement": "Only payslips whose pay date falls within the 13-week lookback count (MT-4 §2.3). ⚠ Code currently caps the window at 8 weeks (#112) — divergence under huddle review (h-101).",
+          "why": "13 weeks per means-test guidance MT-4 §2.3: a shorter window over-weights one-off payments, a longer one hides recent job loss. The 8-week cap is a declared temporary workaround for the DAT-512 payslip backfill.",
+          "provenance": { "type": "trace", "source": "commit c4af2fa (#81); divergence: commit cfb96ed (#112)", "author": "Amara Diallo", "date": "2025-04-21" },
+          "confidence": 0.9,
+          "status": "hypothesis",
+          "codeLinks": [{ "file": "src/assessment/incomeAssessment.ts", "symbol": "LOOKBACK_WEEKS" }]
+        },
+        {
+          "id": "r-ia-monthly",
+          "kind": "business-rule",
+          "classification": "invariant",
+          "statement": "Monthly pay converts to weekly as net × 12 ÷ 52 — NEVER month ÷ 4.33.",
+          "why": "MT-4 §2.5 defines a week statutorily; the 4.33 shortcut drifts a few pence per week, enough to flip a borderline applicant across a tier threshold.",
+          "provenance": { "type": "trace", "source": "commit c8fb462 (#84)", "author": "Priya Sharma", "date": "2025-05-06" },
+          "confidence": 0.88,
+          "status": "hypothesis",
+          "codeLinks": [{ "file": "src/assessment/payslip.ts", "symbol": "weeklyEquivalentPence" }]
+        },
+        {
+          "id": "r-ia-noevidence",
+          "kind": "business-rule",
+          "classification": "invariant",
+          "statement": "Zero payslips in the window assesses at STANDARD — never guess a lower tier; the applicant may re-submit with evidence.",
+          "why": "Spec §5: a guessed concession or hardship tier is an unauditable fee discount.",
+          "provenance": { "type": "trace", "source": "commit c4af2fa (#81)", "author": "Amara Diallo", "date": "2025-04-21" },
+          "confidence": 0.85,
+          "status": "hypothesis",
+          "codeLinks": [{ "file": "src/assessment/incomeAssessment.ts", "symbol": "assessTier" }]
+        },
+        {
+          "id": "r-ia-household",
+          "kind": "business-rule",
+          "classification": "invariant",
+          "statement": "Where the Case belongs to a household group, the assessment combines the net income of ALL household members.",
+          "why": "The household pays one set of bills (spec §3); assessing one member's income alone under-states the household's means.",
+          "provenance": { "type": "trace", "source": "commit c4af2fa (#81) + specs/functions/household-grouping.md", "author": "Amara Diallo", "date": "2025-04-21" },
+          "confidence": 0.84,
+          "status": "hypothesis",
+          "codeLinks": [{ "file": "src/assessment/incomeAssessment.ts", "symbol": "assessTier" }]
+        }
+      ]
+    },
+    {
+      "id": "fn-fee-calculation",
+      "name": "Fee Calculation",
+      "description": "Computes the filing fee from the base schedule, the tier discount and the regional levy — and writes the audit ledger the regulator reads.",
+      "spec": "appeals-service/specs/functions/fee-calculation.md",
+      "paths": ["appeals-service/specs/functions/fee-calculation.md", "appeals-service/src/pricing"],
+      "rules": [
+        {
+          "id": "r-fee-order",
+          "kind": "business-rule",
+          "classification": "invariant",
+          "statement": "applyTierDiscount() MUST run before applyRegionalAdjustment() in calculateFilingFee().",
+          "why": "Tribunal Fees Transparency Code (FTC Reg 4.2): the post-discount figure is the 'assessed fee' reported to the regulator on the quarterly return. Both steps are multiplicative, so the final total is identical in either order and the entire test suite passes both ways — the violation is only visible in the audit ledger line items the regulator reads.",
+          "provenance": { "type": "trace", "source": "commit 5195ade (#47), promoted to spec in c7a5925 (#92)", "author": "Priya Sharma", "date": "2024-11-18" },
+          "confidence": 0.95,
+          "status": "hypothesis",
+          "codeLinks": [
+            { "file": "src/pricing/feeCalculator.ts", "symbol": "calculateFilingFee" },
+            { "file": "src/pricing/discounts.ts", "symbol": "applyTierDiscount" },
+            { "file": "src/pricing/regional.ts", "symbol": "applyRegionalAdjustment" }
+          ]
+        },
+        {
+          "id": "r-fee-assessed",
+          "kind": "terminology",
+          "classification": "invariant",
+          "statement": "'Assessed fee' is the post-discount, pre-levy figure — NOT the total the applicant pays. Never report the final total to the regulator.",
+          "why": "FTC Reg 4.2 defines the assessed fee for the quarterly fee return; conflating it with the amount payable misstates the return.",
+          "provenance": { "type": "trace", "source": "commit 5195ade (#47)", "author": "Priya Sharma", "date": "2024-11-18" },
+          "confidence": 0.88,
+          "status": "hypothesis",
+          "codeLinks": [{ "file": "src/pricing/auditLedger.ts", "symbol": "AuditLedger.exportForRegulator" }]
+        }
+      ]
+    },
+    {
+      "id": "fn-review-queue",
+      "name": "Review Queue",
+      "description": "Orders submitted Cases for tribunal review.",
+      "spec": null,
+      "paths": ["appeals-service/src/review"],
+      "rules": [
+        {
+          "id": "r-rev-hardship",
+          "kind": "rationale",
+          "classification": "unknown",
+          "statement": "Hardship cases are sorted ahead of the general review queue.",
+          "why": "Code-derived hypothesis: the comment says hardship applicants are taken first, but no spec or trace explains whether this is policy, SLA, or developer choice. No spec file exists for this function yet.",
+          "provenance": { "type": "code", "source": "src/review/reviewQueue.ts#enqueue" },
+          "confidence": 0.6,
+          "status": "hypothesis",
+          "codeLinks": [{ "file": "src/review/reviewQueue.ts", "symbol": "enqueue" }]
+        }
+      ]
+    }
+  ],
+  "huddle": {
+    "items": [
+      {
+        "id": "h-101",
+        "raisedAt": "2026-06-12T08:30:00.000Z",
+        "kind": "divergence",
+        "title": "Income assessment lookback: code now 8 weeks, spec says 13",
+        "detail": "Yesterday's commit cfb96ed (#112) caps LOOKBACK_WEEKS at 8 pending the DAT-512 payslip backfill. specs/functions/income-assessment.md §2 still mandates 13 weeks (MT-4 §2.3). All 33 tests pass either way — the suite is blind to this divergence.",
+        "suggestion": "Either annotate the spec with the temporary workaround and an expiry condition (DAT-512 completion), or hold the spec at 13 weeks and track the code revert on the DAT-512 ticket. Borderline applicants assessed during the cap may need re-assessment — worth a BA decision.",
+        "source": { "commit": "cfb96ed", "ref": "#112", "author": "Priya Sharma", "date": "2026-06-11" },
+        "codeLinks": [
+          { "file": "src/assessment/incomeAssessment.ts", "symbol": "LOOKBACK_WEEKS" },
+          { "file": "specs/functions/income-assessment.md", "symbol": "§2" }
+        ],
+        "relatesTo": ["fn-income-assessment"],
+        "routedTo": { "name": "Priya Sharma + Amara Diallo", "basis": "commit author of #112 + spec owner of income-assessment.md" },
+        "status": "open"
+      },
+      {
+        "id": "h-103",
+        "raisedAt": "2026-06-12T08:30:00.000Z",
+        "kind": "terminology",
+        "title": "'Household unit' (new spec wording) vs 'household group' (glossary + code)",
+        "detail": "Yesterday's commit 9221918 (#113) aligned the household-grouping spec with the client's policy paper P-77, which says 'household unit'. The glossary and code say 'household group' (HouseholdGroup, HH- refs). Two names for one concept is how the Ticket/Case trap started.",
+        "suggestion": "Pick one name before a third appears. If 'household unit' is now the business term, schedule the code rename (HouseholdGroup → HouseholdUnit) and record the alias for the transition window; otherwise revert the spec wording.",
+        "source": { "commit": "9221918", "ref": "#113", "author": "Amara Diallo", "date": "2026-06-11" },
+        "codeLinks": [
+          { "file": "src/household/householdGrouping.ts", "symbol": "HouseholdGroup" },
+          { "file": "specs/functions/household-grouping.md", "symbol": "§3-4" }
+        ],
+        "relatesTo": ["fn-household-grouping"],
+        "routedTo": { "name": "Whole huddle", "basis": "ubiquitous-language decision — needs BA + dev agreement" },
+        "status": "open"
+      },
+      {
+        "id": "h-105",
+        "raisedAt": "2026-06-12T08:30:00.000Z",
+        "kind": "spec-change",
+        "title": "Business rule change: means-test thresholds uprated from 1 July",
+        "detail": "Yesterday's commit e9de1e5 (#114) writes the MT-4 Sch. 1 uprating circular into the income-assessment spec: hardship £215.00 → £223.50, concession £380.00 → £394.50 weekly net, effective for assessments RUN on or after 2026-07-01 (rate picked by assessment date, not the evidence's pay dates). Code correctly carries the April 2025 constants until then — not a divergence yet.",
+        "suggestion": "Schedule the constant update in src/assessment/incomeAssessment.ts to land before 1 July, and decide whether it ships as a dated rate table (both rates, picked by assessment date) or a cutover deploy. A rate table avoids a midnight deploy and keeps re-runs of old assessments reproducible.",
+        "source": { "commit": "e9de1e5", "ref": "#114", "author": "Amara Diallo", "date": "2026-06-11" },
+        "codeLinks": [
+          { "file": "specs/functions/income-assessment.md", "symbol": "§4" },
+          { "file": "src/assessment/incomeAssessment.ts", "symbol": "HARDSHIP_WEEKLY_NET / CONCESSION_WEEKLY_NET" }
+        ],
+        "relatesTo": ["fn-income-assessment"],
+        "routedTo": { "name": "Priya Sharma", "basis": "owner of the assessment module (commits #84, #112)" },
+        "status": "open"
+      },
+      {
+        "id": "h-104",
+        "raisedAt": "2026-06-12T08:30:00.000Z",
+        "kind": "decision",
+        "title": "Joint assessments are now copied to every household member case",
+        "detail": "Yesterday's commit 192d714 (#115) implements the joint-assessment wording from #113: assessHousehold() records one IncomeAssessment per member Case with the same combined figures, rather than introducing a shared household-assessment record. Rationale from the commit: each Case file stays self-contained for tribunal review, at the cost of duplicate rows.",
+        "suggestion": "For sharing — spec §4 and code agree, no divergence detected. Worth the BAs confirming the tribunal-review framing matches how panels actually work a case file.",
+        "source": { "commit": "192d714", "ref": "#115", "author": "Dan Okafor", "date": "2026-06-11" },
+        "codeLinks": [
+          { "file": "src/assessment/incomeAssessment.ts", "symbol": "assessHousehold" },
+          { "file": "specs/functions/household-grouping.md", "symbol": "§4" }
+        ],
+        "relatesTo": ["fn-income-assessment"],
+        "routedTo": { "name": "Whole huddle", "basis": "design decision shared for awareness — commit author: Dan Okafor" },
+        "status": "open"
+      },
+      {
+        "id": "h-102",
+        "raisedAt": "2026-06-11T22:14:00.000Z",
+        "kind": "oddity",
+        "title": "Redundant null check on normalizeRef() in ticketToCase()",
+        "detail": "In ticketToCase(), the result of normalizeRef() is null-checked, but normalizeRef() can never return null (String.replace always returns a string). Carried over from yesterday's huddle — no PR, commit, or comment explains it.",
+        "suggestion": "Is this guarding against something real — a planned change to normalizeRef, a known bad legacy record — or accidental? Until answered, agents and devs are told to treat it as intentional.",
+        "source": { "commit": "309fd26", "ref": "#61", "author": "Dan Okafor", "date": "2025-01-22" },
+        "codeLinks": [{ "file": "src/legacy/ticketAdapter.ts", "symbol": "ticketToCase" }],
+        "relatesTo": ["fn-search"],
+        "routedTo": { "name": "Dan Okafor", "basis": "git blame: lines introduced in commit 309fd26 (#61), sole author of the adapter" },
+        "status": "open"
+      },
+      {
+        "id": "h-099",
+        "raisedAt": "2026-06-05T08:30:00.000Z",
+        "kind": "terminology",
+        "title": "'Correspondence' (specs, business) vs 'notification' (code module)",
+        "detail": "The domain specs introduced Correspondence as the business term while the code module is src/notifications. Risk of the concept forking into two.",
+        "suggestion": "Decide the canonical term and record the alias.",
+        "source": { "commit": "5ef25bc", "ref": "#78", "author": "Amara Diallo", "date": "2025-04-08" },
+        "relatesTo": ["dom-correspondence"],
+        "routedTo": { "name": "Whole huddle", "basis": "ubiquitous-language decision" },
+        "status": "resolved",
+        "resolution": {
+          "action": "Correspondence is the business term; all new code and specs use it. src/notifications keeps its module name until the migration window — recorded as an alias so nobody models them as two concepts.",
+          "owner": "Sofia Lindqvist",
+          "recordedBy": "Amara Diallo (facilitator)",
+          "date": "2026-06-05",
+          "outcome": "terminology-aligned"
+        }
+      }
+    ]
+  }
+}

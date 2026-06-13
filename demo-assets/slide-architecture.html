@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Griot — architecture</title>
+    <title>ContextCaddy — architecture</title>
     <style>
       :root {
         --bg: #0e1117;
@@ -221,9 +221,9 @@
   <body>
     <div class="deck" id="deck">
       <div class="title">
-        <h1><span>Griot</span> — architecture</h1>
+        <h1><span>ContextCaddy</span> — architecture</h1>
         <p>
-          deterministic structure · probabilistic knowledge · honest delivery
+          deterministic context · probabilistic knowledge · honest delivery
         </p>
       </div>
 
@@ -231,17 +231,17 @@
         <div class="col">
           <h3>Sources</h3>
           <div class="card">
-            <h4>Repository</h4>
-            <p>source files, parsed every run</p>
+            <h4>Specs + code</h4>
+            <p>spec-to-code: specs/domains + specs/functions live in the repo</p>
           </div>
           <div class="card">
-            <h4>Project history</h4>
-            <p>commits, PR descriptions, review comments</p>
+            <h4>Commit history</h4>
+            <p>rich commit messages from BAs and devs — the BDR/ADR record</p>
           </div>
           <div class="card">
-            <h4>People</h4>
+            <h4>The daily huddle</h4>
             <p>
-              answers to open questions, corrections in chat, modelling sessions
+              resolution actions recorded by the facilitator — attributed, dated
             </p>
           </div>
         </div>
@@ -251,17 +251,17 @@
         <div class="col core">
           <h3>The graph — system of record</h3>
           <div class="card det">
-            <span class="tag det">DETERMINISTIC · REBUILT EVERY RUN</span>
-            <h4>Code graph</h4>
+            <span class="tag det">DETERMINISTIC · READ LIVE, NEVER COPIED</span>
+            <h4>Context history</h4>
             <p>
-              tree-sitter AST → symbols, references, call paths,
-              <b>content hashes</b>. Ground truth — structure is never
-              hallucinated.
+              <b>git log</b> over each entity's spec + code paths — the
+              chronological decision log. Free at any repo size; never goes
+              stale because it is never duplicated.
             </p>
           </div>
           <div class="joint">
-            claims anchor to symbols · hash mismatch ⇒ <b>flagged stale</b>,
-            never silently wrong
+            rules anchor to code links · spec ≠ code ⇒ <b>flagged for the
+            huddle</b>, never silently wrong
           </div>
           <div class="card prob">
             <span class="tag prob"
@@ -269,10 +269,10 @@
             >
             <h4>Knowledge graph</h4>
             <p>
-              claims, terms, contexts, <b>open questions</b> — each with
-              provenance, confidence, classification (invariant / accident /
-              unknown). Human-verified claims are immutable: provenance only
-              ratchets upward.
+              domain models, business functions, rules, the <b>huddle
+              queue</b> — each with provenance, confidence, classification
+              (invariant / accident / unknown). Human-verified decisions are
+              immutable: provenance only ratchets upward.
             </p>
             <div class="legend">
               <span class="chip h">✅ human-verified</span>
@@ -289,14 +289,14 @@
           <div class="card">
             <span class="tag push">PUSH · ALWAYS LOADED</span>
             <h4>Root CLAUDE.md</h4>
-            <p>cross-cutting invariants, glossary core, open-question policy</p>
+            <p>cross-cutting invariants, terminology traps, open huddle items</p>
           </div>
           <div class="card">
             <span class="tag push">PUSH · SCOPED</span>
             <h4>Per-context rules</h4>
             <p>
-              bounded contexts → nested CLAUDE.md + glob-scoped .cursor/rules,
-              mapped 1:1
+              domains &amp; functions → nested CLAUDE.md + glob-scoped
+              .cursor/rules, mapped 1:1
             </p>
           </div>
           <div class="card">
@@ -311,8 +311,8 @@
             <span class="tag push">HUMANS</span>
             <h4>Onboarding &amp; handover</h4>
             <p>
-              guided domain model browser; transition docs generated, not
-              written
+              self-serve domain models with live history; transition docs
+              generated, not written
             </p>
           </div>
         </div>
@@ -321,11 +321,12 @@
       <div class="scaling">
         <span class="label">Why it scales</span>
         <p>
-          <b>Regeneration is free</b> — a template render, no LLM.
-          <b>Ingest is incremental</b> — a cursor over new commits, so cost
-          tracks <b>change velocity, not repo size</b>. And the context window
-          is protected: only high-severity knowledge is pushed; everything else
-          is pulled through MCP.
+          <b>History is free</b> — it's git, deterministic at any size.
+          <b>Rules regeneration is free</b> — a template render, no LLM.
+          The LLM cost is the huddle-queue construction over <b>one day of
+          commits</b> — cost tracks change velocity, not repo size. And the
+          context window is protected: only high-severity knowledge is pushed;
+          the long tail is pulled through MCP.
         </p>
       </div>
     </div>

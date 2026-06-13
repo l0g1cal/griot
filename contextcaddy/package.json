@@ -1,0 +1,12 @@
+{
+  "name": "contextcaddy",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "ContextCaddy — shared context layer for agent-augmented agile delivery. Knowledge graph + huddle loop + agent rules generator.",
+  "scripts": {
+    "generate": "node generate-rules.mjs",
+    "resolve": "node resolve-item.mjs",
+    "reset": "cp knowledge/graph.seed.json knowledge/graph.json && echo 'graph.json reset to seed' && node generate-rules.mjs"
+  }
+}
